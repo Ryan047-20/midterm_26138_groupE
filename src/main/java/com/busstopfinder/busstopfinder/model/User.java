@@ -21,7 +21,7 @@ public class User {
     @Column(nullable=false)
     private String password;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "province_id", nullable = false)
     private Province province;
 

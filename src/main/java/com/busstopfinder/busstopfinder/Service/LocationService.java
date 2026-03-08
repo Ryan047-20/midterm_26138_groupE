@@ -16,7 +16,9 @@ public class LocationService {
         if (locationRepository.existsByStreetAndSector(location.getStreet(), location.getSector())) {
             throw new RuntimeException("Location with this street and sector already exists!");
         }
-        return locationRepository.save(location);
+        Location saved = locationRepository.save(location);
+         return locationRepository.findById(saved.getId())
+            .orElseThrow(() -> new RuntimeException("Location not found!"));
     }
 
     public List<Location> getAllLocations() {

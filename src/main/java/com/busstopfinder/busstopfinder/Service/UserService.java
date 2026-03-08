@@ -16,7 +16,9 @@ public class UserService {
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new RuntimeException("User with this email already exists!");
         }
-        return userRepository.save(user);
+        User saved = userRepository.save(user);
+             return userRepository.findById(saved.getId())
+            .orElseThrow(() -> new RuntimeException("User not found!"));
     }
 
     public List<User> getUsersByProvinceCode(String code) {

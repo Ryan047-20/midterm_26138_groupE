@@ -19,7 +19,7 @@ public class Location {
     private Double latitude;
     private Double longitude;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "province_id", nullable = false)
     private Province province;
 }

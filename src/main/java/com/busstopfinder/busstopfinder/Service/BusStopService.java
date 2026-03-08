@@ -16,7 +16,9 @@ public class BusStopService {
         if (busStopRepository.existsByName(busStop.getName())) {
             throw new RuntimeException("Bus stop with this name already exists!");
         }
-        return busStopRepository.save(busStop);
+        BusStop saved = busStopRepository.save(busStop);
+            return busStopRepository.findById(saved.getId())
+            .orElseThrow(() -> new RuntimeException("Bus stop not found!"));
     }
 
     public List<BusStop> getAllBusStops() {
