@@ -1,36 +1,55 @@
-#  Bus Stop Finder
+# Bus Stop Finder
 
-A Spring Boot REST API designed to help commuters in Rwanda easily locate bus stops and view essential information about routes that serve each stop.
+A Spring Boot REST API designed to help commuters in Rwanda easily locate 
+bus stops and view essential information about routes that serve each stop.
 
-##  Project Overview
+## Project Overview
 
-Bus Stop Finder addresses the problem of inaccessible public transport information by providing a centralized platform where users can quickly access bus stop details and route information.
+Bus Stop Finder addresses the problem of inaccessible public transport 
+information by providing a centralized platform where users can quickly 
+access bus stop details and route information.
 
-###  Target Users
+### Target Users
 - Daily commuters
 - Students and workers using public transport
 - Visitors unfamiliar with local bus routes
 
 ---
 
-##  Database Design
+## Database Design
 
 ### Entity Relationship Diagram
-The system uses **7 database tables** with the following relationships:
 
-| Relationship | Tables | Type |
+The system uses **4 core tables** plus a join table:
+
+| Relationship | Description | Type |
 |---|---|---|
-| Province → Location | 1 province, many locations | One-to-Many |
+| Location → Location | Province contains Districts, Districts contain Sectors, Sectors contain Cells, Cells contain Villages | Self-referencing One-to-Many |
 | Location → BusStop | 1 location, 1 bus stop | One-to-One |
 | BusStop ↔ Route | via bus_stop_route join table | Many-to-Many |
-| Province → User | 1 province, many users | One-to-Many |
+| Location → User | User links to their Village | Many-to-One |
 
 ### Entities
-- **Province** - Rwanda's provinces (e.g. Kigali, Northern...)
-- **Location** - Physical address with cell, sector, district details
+
+- **Location** - Self-referencing table representing Rwanda's full 
+administrative hierarchy: Province → District → Sector → Cell → Village
 - **BusStop** - Named bus stop at a specific location
-- **Route** - Bus line with start and end points
-- **User** - Registered commuter belonging to a province
+- **Route** - Bus line with route number, start point and end point
+- **User** - Registered commuter linked to their village
+- **bus_stop_route** - Join table managing BusStop and Route relationship
+
+### Rwanda Administrative Hierarchy
+```
+Province (e.g. Kigali)
+    └── District (e.g. Nyarugenge)
+        └── Sector (e.g. Nyamirambo)
+            └── Cell (e.g. Cyivugiza)
+                └── Village (e.g. Karisimbi)
+                    └── User (e.g. Shema Ryan)
+```
+
+When a user is saved with only their Village, the system automatically 
+resolves their full geographic chain all the way up to Province.
 
 ---
 
@@ -45,7 +64,7 @@ The system uses **7 database tables** with the following relationships:
 
 ---
 
-## Setup Instructions
+##  Setup Instructions
 
 ### Prerequisites
 - Java 21
@@ -53,6 +72,7 @@ The system uses **7 database tables** with the following relationships:
 - Maven
 
 ### Steps
+
 1. Clone the repository:
 ```
 git clone https://github.com/Ryan047-20/bus-stop-finder.git
@@ -77,21 +97,16 @@ mvn spring-boot:run
 
 ---
 
-##  API Endpoints
+## 🔌 API Endpoints
 
-### Provinces
+### Locations (Province → District → Sector → Cell → Village)
 | Method | Endpoint | Description |
 |---|---|---|
-| POST | /api/provinces/save | Save a new province |
-| GET | /api/provinces/all | Get all provinces |
-| GET | /api/provinces/{id} | Get province by ID |
-
-### Locations
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | /api/locations/save | Save a new location |
+| POST | /api/locations/save | Save any location level |
 | GET | /api/locations/all | Get all locations |
 | GET | /api/locations/{id} | Get location by ID |
+| GET | /api/locations/type/{type} | Get locations by type (PROVINCE, DISTRICT etc.) |
+| GET | /api/locations/children/{parentId} | Get all children of a location |
 
 ### Bus Stops
 | Method | Endpoint | Description |
@@ -109,25 +124,65 @@ mvn spring-boot:run
 ### Users
 | Method | Endpoint | Description |
 |---|---|---|
-| POST | /api/users/save | Register a new user |
-| GET | /api/users/province/code/{code} | Get users by province code |
-| GET | /api/users/province/name/{name} | Get users by province name |
+| POST | /api/users/save | Register a new user with village id |
+| GET | /api/users/province/{provinceId} | Get all users in a province by id |
+| GET | /api/users/province/name/{name} | Get all users in a province by name |
 
 ---
 
 ##  Key Features Implemented
 
-- ✅ **One-to-One** relationship between BusStop and Location
-- ✅ **One-to-Many** relationship between Province and Location
-- ✅ **Many-to-Many** relationship between BusStop and Route
-- ✅ **Pagination and Sorting** on Routes endpoint
-- ✅ **existsBy()** checks to prevent duplicate data
-- ✅ **Query by province** code or name
+-  **Self-referencing One-to-Many** — Location table models Rwanda's 
+full administrative hierarchy in one elegant table
+-  **One-to-One** relationship between BusStop and Location
+-  **Many-to-Many** relationship between BusStop and Route 
+via bus_stop_route join table
+-  **Pagination and Sorting** on Routes endpoint using Pageable
+-  **existsBy()** checks to prevent duplicate data before saving
+-  **Retrieve users by province** id or name by walking up the 
+parent chain from Village to Province
+
+---
+
+## Sample API Usage
+
+### Save a complete Rwanda location chain:
+```json
+// 1. Save Province
+POST /api/locations/save
+{ "name": "Kigali", "type": "PROVINCE", "parent": null }
+
+// 2. Save District
+POST /api/locations/save
+{ "name": "Nyarugenge", "type": "DISTRICT", "parent": { "id": 1 } }
+
+// 3. Save Sector
+POST /api/locations/save
+{ "name": "Nyamirambo", "type": "SECTOR", "parent": { "id": 2 } }
+
+// 4. Save Cell
+POST /api/locations/save
+{ "name": "Cyivugiza", "type": "CELL", "parent": { "id": 3 } }
+
+// 5. Save Village
+POST /api/locations/save
+{ "name": "Karisimbi", "type": "VILLAGE", "parent": { "id": 4 } }
+
+// 6. Register User with Village only
+POST /api/users/save
+{
+    "username": "Shema Ryan",
+    "email": "ryanshema7@gmail.com",
+    "password": "yourpassword",
+    "village": { "id": 5 }
+}
+```
 
 ---
 
 ##  Author
 
-*SHEMA RYAN*
-*ID:26138*
+**SHEMA RYAN**
+**ID: 26138**
 Adventist University of Central Africa (AUCA)
+Web Technology and Internet — Midterm Project 20
