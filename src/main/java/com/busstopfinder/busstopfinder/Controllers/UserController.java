@@ -26,9 +26,9 @@ public class UserController {
         }
     }
 
-    @GetMapping(value = "/province/code/{code}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getUsersByProvinceCode(@PathVariable String code) {
-        List<User> users = userService.getUsersByProvinceCode(code);
+    @GetMapping(value = "/province/{provinceId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getUsersByProvinceId(@PathVariable Long provinceId) {
+        List<User> users = userService.getUsersByProvinceId(provinceId);
         if (users.isEmpty()) {
             return new ResponseEntity<>("No users found in this province.", HttpStatus.NOT_FOUND);
         }

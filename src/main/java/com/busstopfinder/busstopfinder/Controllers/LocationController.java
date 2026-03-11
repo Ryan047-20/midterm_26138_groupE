@@ -1,6 +1,7 @@
 package com.busstopfinder.busstopfinder.Controllers;
 
 import com.busstopfinder.busstopfinder.model.Location;
+import com.busstopfinder.busstopfinder.model.LocationType;
 import com.busstopfinder.busstopfinder.Service.LocationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,7 @@ public class LocationController {
 
     @Autowired
     private LocationService locationService;
+
     @PostMapping(value = "/save", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> saveLocation(@RequestBody Location location) {
         try {
@@ -31,6 +33,18 @@ public class LocationController {
         return new ResponseEntity<>(locations, HttpStatus.OK);
     }
 
+    @GetMapping(value = "/type/{type}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getLocationsByType(@PathVariable LocationType type) {
+        List<Location> locations = locationService.getLocationsByType(type);
+        return new ResponseEntity<>(locations, HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/children/{parentId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getChildrenByParentId(@PathVariable Long parentId) {
+        List<Location> locations = locationService.getChildrenByParentId(parentId);
+        return new ResponseEntity<>(locations, HttpStatus.OK);
+    }
+
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getLocationById(@PathVariable Long id) {
         try {
@@ -40,6 +54,4 @@ public class LocationController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
-
-
 }

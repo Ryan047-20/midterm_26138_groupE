@@ -2,8 +2,8 @@ package com.busstopfinder.busstopfinder.Service;
 
 import com.busstopfinder.busstopfinder.model.BusStop;
 import com.busstopfinder.busstopfinder.model.Location;
-import com.busstopfinder.busstopfinder.model.Province;
-import com.busstopfinder.busstopfinder.repositories.ProvinceRepository;
+
+
 import com.busstopfinder.busstopfinder.repositories.BusStopRepository;
 import com.busstopfinder.busstopfinder.repositories.LocationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +17,7 @@ public class BusStopService {
     private BusStopRepository busStopRepository;
     @Autowired
     private LocationRepository locationRepository;
-    @Autowired
-    private ProvinceRepository provinceRepository;
+   
 
     public BusStop saveBusStop(BusStop busStop) {
         if (busStopRepository.existsByName(busStop.getName())) {
@@ -28,10 +27,7 @@ public class BusStopService {
            Location location = locationRepository.findById(busStop.getLocation().getId())
             .orElseThrow(() -> new RuntimeException("Location not found!"));
     
-           // Load the full province inside the location
-            Province province = provinceRepository.findById(location.getProvince().getId())
-            .orElseThrow(() -> new RuntimeException("Province not found!"));
-            location.setProvince(province);
+          
     
                busStop.setLocation(location);
               return busStopRepository.save(busStop);

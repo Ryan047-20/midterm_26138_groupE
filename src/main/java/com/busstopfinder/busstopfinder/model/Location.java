@@ -1,27 +1,34 @@
 package com.busstopfinder.busstopfinder.model;
 
 import jakarta.persistence.*;
-import lombok.Data; 
+import lombok.Data;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Data
 @Entity
-@Table(name = "Locations")
+@Table(name = "locations")
 public class Location {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String cell;
-    private String sector;
-    private String district;
-    private String street;
-    private Double latitude;
-    private Double longitude;
+    @Column(nullable = false)
+    private String name;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "province_id", nullable = false)
-    private Province province;
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private LocationType type;
+
+    @ManyToOne
+    @JoinColumn(name = "parent_id")
+    private Location parent;
+    
+    @JsonIgnore
+    @OneToMany(mappedBy = "parent")
+    private List<Location> children;
 }
 
     
