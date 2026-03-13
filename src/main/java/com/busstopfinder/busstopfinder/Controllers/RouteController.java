@@ -34,4 +34,15 @@ public class RouteController {
         Page<Route> routes = routeService.getAllRoutes(page, size, sortBy);
         return new ResponseEntity<>(routes, HttpStatus.OK);
     }
+    @PostMapping(value = "/{routeId}/busstops/{busStopId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> addBusStopToRoute(
+        @PathVariable Long routeId,
+        @PathVariable Long busStopId) {
+    try {
+        Route updated = routeService.addBusStopToRoute(routeId, busStopId);
+        return new ResponseEntity<>(updated, HttpStatus.OK);
+    } catch (RuntimeException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
+}
 }
